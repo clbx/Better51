@@ -21,49 +21,38 @@ class i8051{
 
         void execute(uint8_t);
 
+    public:
+        //Setters and getters for the debugger
+        uint16_t getPC(){
+            return pc;
+        }
+        void setPC(uint16_t val){
+            pc = val;
+        }
 
-        void ACALL();
-        void ADD();
-        void AJMP();
-        void ANL();
-        void CJNE();
-        void CLR();
-        void CPL();
-        void DA();
-        void DEC();
-        void DIV();
-        void DJNZ();
-        void INC();
-        void JB();
-        void JBC();
-        void JMP();
-        void JNB();
-        void JNC();
-        void JNZ();
-        void JZ();
-        void LCALL();
-        void LJMP();
-        void MOV();
-        void MOVC();
-        void MOVX();
-        void MUL();
-        void NOP();
-        void ORL();
-        void POP();
-        void PUSH();
-        void RET();
-        void RETI();
-        void RL();
-        void RLC();
-        void RR();
-        void RRC();
-        void SETB();
-        void SJMP();
-        void SUBB();
-        void SWAP();
-        void XCH();
-        void XCHD();
-        void XRL();
+        uint8_t getSP(){
+            return sp;
+        }
+        void setSP(uint8_t val){
+            sp = val;
+        }
+
+        uint16_t getDP(){
+            return dp;
+        }
+        void setDP(uint16_t val){
+            dp = val;
+        }
+
+        
+
+
+
+
+
+
+
+
 
 
 };
