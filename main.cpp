@@ -6,6 +6,8 @@
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
+#include "imgui_memory_editor.h"
+#include "i8051.hpp"
 #include <stdio.h>
 #include <SDL.h>
 #include <GL/gl3w.h>    // Initialize with gl3wInit()
@@ -31,7 +33,7 @@ int main(int, char**)
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Cosmic", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window* window = SDL_CreateWindow("Cosmic", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 900, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -63,6 +65,10 @@ int main(int, char**)
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f); 
 
+    static MemoryEditor ram_edit;
+    static MemoryEditor rom_edit;
+    i8051 proc;
+
     // Main loop
     bool done = false;
     while (!done)
@@ -82,14 +88,22 @@ int main(int, char**)
                 done = true;
         }
 
+
+
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
 
+        //ImGui::ShowDemoWindow();
 
+        ImGui::SetNextWindowPos(ImVec2(440,95), ImGuiCond_Once);
+        ram_edit.DrawWindow("Memory Editor", proc.memory, sizeof(uint8_t)*128);
+        ram_edit.HighlightMax = proc.pc;
+        ram_edit.HighlightMin = proc.pc;
 
-
+        ImGui::SetNextWindowPos(ImVec2(440,275), ImGuiCond_Once);
+        rom_edit.DrawWindow("Program Code Editor", proc.rom, sizeof(uint8_t) * 4096);
 
         ImGui::SetNextWindowPos(ImVec2(60,95), ImGuiCond_Once);
         ImGui::Begin("Editor");
@@ -98,8 +112,16 @@ int main(int, char**)
         ImGui::End();
 
         printf("%s",text);
+
+
         
 
+
+        ImGui::SetNextWindowPos(ImVec2(1080,20), ImGuiCond_Once);
+        ImGui::Begin("Debug");
+        ImVec2 mousePos = ImGui::GetMousePos();
+            ImGui::Text("%f, %f",mousePos.x,mousePos.y);
+        ImGui::End();
 
 
 

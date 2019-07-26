@@ -1,5 +1,6 @@
 better51
 .DS_Store
+imgui.ini
 
 # Prerequisites
 *.d
