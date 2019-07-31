@@ -17,6 +17,16 @@ void i8051::reset(){
     timer1 = 0; 
 }
 
+uint8_t i8051::nextByte(){
+    uint8_t next = rom[pc];
+    pc += 1;
+    return next;
+}
+
+int i8051::getRegAddr(int reg){
+    return reg + (8*((psw & 0x18) >> 3)); //0001 1000  where the psw holds the current register bank;
+}
+
 void i8051::execute(uint8_t op){
     switch(op){
         // NOP - No Opcode
@@ -50,40 +60,40 @@ void i8051::execute(uint8_t op){
 
         // ADD - Add Accumulator
         case 0x24:{ //ADD A, #DATA
-
+            a = a + nextByte();
         } break;
         case 0x25:{ //ADD A, iram addr
-
+            a = a + memory[nextByte()];
         } break;
         case 0x26:{ //ADD A, @R0
-
+            a = a + memory[memory[getRegAddr(0)]];
         } break;
         case 0x27:{ //ADD A, @R1
-
+            a = a + memory[memory[getRegAddr(1)]];
         } break;
         case 0x28:{ //ADD A, R0
-
+            a = a + memory[getRegAddr(0)];
         } break;
         case 0x29:{ //ADD A, R1
-
+            a = a + memory[getRegAddr(1)];
         } break;
         case 0x2A:{ //ADD A, R2
-
+            a = a + memory[getRegAddr(2)];
         } break;
         case 0x2B:{ //ADD A, R3
-
+            a = a + memory[getRegAddr(3)];
         } break;
         case 0x2C:{ //ADD A, R4
-
+            a = a + memory[getRegAddr(4)];
         } break;
         case 0x2D:{ //ADD A, R5
-
+            a = a + memory[getRegAddr(5)];
         } break;
         case 0x2E:{ //ADD A, R6
-
+            a = a + memory[getRegAddr(6)];
         } break;
         case 0x2F:{ //ADD A, R7
-
+            a = a + memory[getRegAddr(7)];
         } break;
 
         // ADDC - Add accumulator with carry
@@ -241,14 +251,15 @@ void i8051::execute(uint8_t op){
         //CLR Clear Register
         case 0xC2:{ //CLR bit addr
 
-
         } break;
         case 0xC3:{ //CLR C
+
         } break;
         case 0xE4:{ //CLR A
+
         } break;
 
-        //DA Decimad Adjust Accumulator
+        //DA Decimal Adjust Accumulator
         case 0xD4:{
 
         }

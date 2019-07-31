@@ -23,6 +23,8 @@ class i8051{
         i8051();
         void reset();
         void execute(uint8_t);
+        uint8_t nextByte();
+        int getRegAddr(int);
 
 
 
