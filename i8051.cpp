@@ -27,7 +27,26 @@ int i8051::getRegAddr(int reg){
     return reg + (8*((psw & 0x18) >> 3)); //0001 1000  where the psw holds the current register bank;
 }
 
+void i8051::setParity(){
+    //Set parity bit in psw
+    unsigned int v = a;
+    unsigned int c = 0;
+    for(c = 0; v; c++){
+        v &= v - 1; //thanks brian 
+    }
+    if(c%2 == 0){
+        psw >> 1; //drop the lowest bit
+        psw << 1; // 1000 0001  -> 0100 0000 -> 1000 0000
+    } else{
+        psw = psw | 0x01; //Set the lowest bit 1101 1100 | 0000 0001 = 1101 1101
+    }
+}
+
 void i8051::execute(uint8_t op){
+    
+    setParity();
+
+
     switch(op){
         // NOP - No Opcode
         case 0x00: pc++; break;
@@ -61,6 +80,9 @@ void i8051::execute(uint8_t op){
         // ADD - Add Accumulator
         case 0x24:{ //ADD A, #DATA
             a = a + nextByte();
+            if(a > 256){
+                
+            }
         } break;
         case 0x25:{ //ADD A, iram addr
             a = a + memory[nextByte()];

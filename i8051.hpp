@@ -25,6 +25,7 @@ class i8051{
         void execute(uint8_t);
         uint8_t nextByte();
         int getRegAddr(int);
+        void setParity(); 
 
 
 
