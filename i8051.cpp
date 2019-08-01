@@ -42,6 +42,17 @@ void i8051::setParity(){
     }
 }
 
+
+void i8051::ADDref(uint8_t mem){
+    a = a + memory[mem];
+    
+}
+
+void i8051::ADDval(int val){
+    
+}
+
+
 void i8051::execute(uint8_t op){
     
     setParity();
@@ -79,10 +90,8 @@ void i8051::execute(uint8_t op){
 
         // ADD - Add Accumulator
         case 0x24:{ //ADD A, #DATA
-            a = a + nextByte();
-            if(a > 256){
-                
-            }
+
+            
         } break;
         case 0x25:{ //ADD A, iram addr
             a = a + memory[nextByte()];

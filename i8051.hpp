@@ -26,6 +26,10 @@ class i8051{
         uint8_t nextByte();
         int getRegAddr(int);
         void setParity(); 
+        void setCarries();
+
+        void ADDref(uint8_t);
+        void ADDval(int);
 
 
 
