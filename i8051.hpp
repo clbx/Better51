@@ -1,6 +1,18 @@
 #include <stdint.h>
 #include <iostream>
 
+#define BYTE_TO_BINARY_PATTERN "%c %c %c %c  %c %c %c %c"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0') 
+//fuck std for having hex and octal but no binary
+
 class i8051{
 
     public:
@@ -22,27 +34,20 @@ class i8051{
 
         i8051();
         void reset();
+        bool load(const char*);
         void execute(uint8_t);
+        void tick();
+
+
         uint8_t nextByte();
         int getRegAddr(int);
+        
         void setParity(); 
         void setCarries();
-
-        void ADDref(uint8_t);
-        void ADDval(int);
+        void overflow(int);
 
 
-
-
-        
-
-
-
-
-
-
-
-
+        void ADD(int);
 
 
 };

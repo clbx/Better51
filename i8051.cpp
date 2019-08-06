@@ -4,6 +4,19 @@ i8051::i8051(){
     reset();
 }
 
+bool i8051::load(const char* filename){
+    reset();
+    FILE* file = fopen(filename,"r");
+    if(file == nullptr){
+        return false;
+    }
+    fread(rom,1,sizeof(rom),file);
+    fclose(file);
+
+    return true;
+}
+
+
 void i8051::reset(){
     memset(rom,0,sizeof(rom));
     memset(memory,0,sizeof(memory));   
@@ -35,21 +48,42 @@ void i8051::setParity(){
         v &= v - 1; //thanks brian 
     }
     if(c%2 == 0){
-        psw >> 1; //drop the lowest bit
-        psw << 1; // 1000 0001  -> 0100 0000 -> 1000 0000
+        psw = psw >> 1; //drop the lowest bit
+        psw = psw << 1; // 1000 0001  -> 0100 0000 -> 1000 0000
     } else{
         psw = psw | 0x01; //Set the lowest bit 1101 1100 | 0000 0001 = 1101 1101
     }
 }
 
+// carry  |  aux carry | Flag 0 | reg bank 1 | reg bank 0 | Overflow | user deniable | parity | 
+//  0x80       0x40       0x20      0x10         0x08        0x04        0x02           0x01
+/** ADD Opcode 
+ *  Adds and then, does carry logic
+ */
+void i8051::overflow(int val){
+    psw = psw & 0x59;   //0011 1011  to clear carry bits
 
-void i8051::ADDref(uint8_t mem){
-    a = a + memory[mem];
-    
+    int carry = ((val & 255) + (a & 255)) >> 8;
+    int auxcarry = ((val & 7) + (a & 7)) >> 3;
+    int overflow = (((val & 127) + (a & 127)) >> 7)^carry;
+
+    if(carry){psw = psw | 0x80;}
+    if(auxcarry){psw = psw | 0x40;}
+    if(overflow){psw = psw | 0x04;}
 }
 
-void i8051::ADDval(int val){
-    
+
+
+void i8051::ADD(int val){
+    overflow(val);
+    a = a + val;
+    if(a > 256){a = 256;}
+}
+
+
+void i8051::tick(){
+    printf("tick\n");
+    execute(rom[pc]);
 }
 
 
@@ -57,11 +91,13 @@ void i8051::execute(uint8_t op){
     
     setParity();
 
+    printf("Execute OP: %X\n", op);
+
 
     switch(op){
         // NOP - No Opcode
         case 0x00: pc++; break;
-
+25
         // ACALL - Absolute Call
         case 0x11:{ // ACALL page0
 
@@ -94,7 +130,8 @@ void i8051::execute(uint8_t op){
             
         } break;
         case 0x25:{ //ADD A, iram addr
-            a = a + memory[nextByte()];
+            a = a + 5;
+            printf("A: %X\n",a);
         } break;
         case 0x26:{ //ADD A, @R0
             a = a + memory[memory[getRegAddr(0)]];

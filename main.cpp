@@ -10,10 +10,10 @@
 #include "i8051.hpp"
 #include <stdio.h>
 #include <SDL.h>
-#include <GL/gl3w.h>    // Initialize with gl3wInit()
+#include <GL/gl3w.h> 
 
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -33,7 +33,7 @@ int main(int, char**)
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Cosmic", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 900, window_flags);
+    SDL_Window* window = SDL_CreateWindow("Better51", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 900, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -47,8 +47,12 @@ int main(int, char**)
         return 1;
     }
    
+    char* filename;
+    if(argc > 1){
+        filename = argv[1];        
+    }
     
-    
+
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -69,15 +73,13 @@ int main(int, char**)
     static MemoryEditor rom_edit;
     i8051 proc;
 
+
+    proc.load(filename);
     // Main loop
     bool done = false;
     while (!done)
     {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+       
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -97,21 +99,42 @@ int main(int, char**)
 
         //ImGui::ShowDemoWindow();
 
-        ImGui::SetNextWindowPos(ImVec2(440,95), ImGuiCond_Once);
+        ImGui::SetNextWindowPos(ImVec2(710,100), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(540,175), ImGuiCond_Once);
         ram_edit.DrawWindow("Memory Editor", proc.memory, sizeof(uint8_t)*128);
         ram_edit.HighlightMax = proc.pc;
         ram_edit.HighlightMin = proc.pc;
 
-        ImGui::SetNextWindowPos(ImVec2(440,275), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(540,400), ImGuiCond_Once);
+        ImGui::SetNextWindowPos(ImVec2(710,280), ImGuiCond_Once);
         rom_edit.DrawWindow("Program Code Editor", proc.rom, sizeof(uint8_t) * 4096);
 
-        ImGui::SetNextWindowPos(ImVec2(60,95), ImGuiCond_Once);
+        ImGui::SetNextWindowPos(ImVec2(340,100), ImGuiCond_Once);
         ImGui::Begin("Editor");
             static char text[1024 * 16] ="";
             ImGui::InputTextMultiline("##source", text, 1024*64, ImVec2(350, ImGui::GetTextLineHeight() * 42));
         ImGui::End();
 
-        printf("%s",text);
+        ImGui::SetNextWindowSize(ImVec2(260,60), ImGuiCond_Once);
+        ImGui::SetNextWindowPos(ImVec2(75,100), ImGuiCond_Once);
+        ImGui::Begin("Control");
+            if(ImGui::Button("Step")){
+                proc.tick();
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Reset")){
+                proc.reset();
+            }
+        ImGui::End();
+
+        ImGui::SetNextWindowSize(ImVec2(260,400), ImGuiCond_Once);
+        ImGui::SetNextWindowPos(ImVec2(75,160), ImGuiCond_Once);
+        ImGui::Begin("Registers");
+            ImGui::Text("PC: (%X)",proc.pc);
+            ImGui::Text("A: (%X)", proc.a);
+            ImGui::Text("B: (%X)",proc.b);
+            ImGui::Text("PSW: "BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(proc.psw));
+        ImGui::End();
 
 
         
