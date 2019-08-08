@@ -150,6 +150,13 @@ struct MemoryEditor
         HighlightMax = addr_max;
     }
 
+    void Highlight(size_t addr_min, size_t addr_max, ImU32 color)
+    {
+        HighlightMin = addr_min;
+        HighlightMax = addr_max;
+        HighlightColor = color;
+    }
+
     struct Sizes
     {
         int     AddrDigitsCount;
