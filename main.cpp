@@ -87,10 +87,7 @@ int main(int argc, char** argv){
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
         }
-
-        
-
-        
+       
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -123,12 +120,13 @@ int main(int argc, char** argv){
         ImGui::SetNextWindowPos(ImVec2(710,100), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(540,175), ImGuiCond_Once);
         ram_edit.DrawWindow("Memory Editor", proc.memory, sizeof(uint8_t)*128);
-        ram_edit.HighlightMax = proc.pc;
-        ram_edit.HighlightMin = proc.pc;
+        ram_edit.Highlight(proc.getRegAddr(0),proc.getRegAddr(7)+1,ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f,0.50f,0.50f,1.0f)));
 
         ImGui::SetNextWindowSize(ImVec2(540,400), ImGuiCond_Once);
         ImGui::SetNextWindowPos(ImVec2(710,280), ImGuiCond_Once);
         rom_edit.DrawWindow("Program Code Editor", proc.rom, sizeof(uint8_t) * 4096);
+        rom_edit.Highlight(proc.pc,proc.pc+1,ImGui::ColorConvertFloat4ToU32(ImVec4(0.75f,0.75f,0.25f,1.0f)));
+        
 
         ImGui::SetNextWindowPos(ImVec2(340,100), ImGuiCond_Once);
         ImGui::Begin("Editor");
