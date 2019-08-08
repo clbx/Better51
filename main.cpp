@@ -10,14 +10,13 @@
 #include "i8051.hpp"
 #include <stdio.h>
 #include <SDL.h>
-#include <GL/gl3w.h> 
+#include <GL/gl3w.h>
+#include <iostream>
 
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv){
     // Setup SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
-    {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0){
         printf("Error: %s\n", SDL_GetError());
         return -1;
     }
@@ -41,8 +40,7 @@ int main(int argc, char** argv)
     
 
     bool err = gl3wInit() != 0;
-    if (err)
-    {
+    if (err){
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         return 1;
     }
@@ -73,16 +71,16 @@ int main(int argc, char** argv)
     static MemoryEditor rom_edit;
     i8051 proc;
 
+    bool getLoadBinaryMenu = false;
+    bool invalidFile = false;
 
     proc.load(filename);
     // Main loop
     bool done = false;
-    while (!done)
-    {
+    while (!done){
        
         SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
+        while (SDL_PollEvent(&event)){
             ImGui_ImplSDL2_ProcessEvent(&event);
             if (event.type == SDL_QUIT)
                 done = true;
@@ -90,7 +88,9 @@ int main(int argc, char** argv)
                 done = true;
         }
 
+        
 
+        
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -98,6 +98,27 @@ int main(int argc, char** argv)
         ImGui::NewFrame();
 
         //ImGui::ShowDemoWindow();
+
+        if (ImGui::BeginMainMenuBar()){
+            if (ImGui::BeginMenu("File")){
+                if(ImGui::MenuItem("Load Assembly")){}
+                if(ImGui::MenuItem("Save Assembly","CTRL+S")){}
+                if(ImGui::MenuItem("Load Binary")){getLoadBinaryMenu = true;}
+                if(ImGui::MenuItem("Save Binary","CTRL+S")){}
+                if(ImGui::MenuItem("Exit")){return 1;}
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Edit")){
+                if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+                if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+                ImGui::Separator();
+                if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+                if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+                if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
 
         ImGui::SetNextWindowPos(ImVec2(710,100), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(540,175), ImGuiCond_Once);
@@ -136,15 +157,38 @@ int main(int argc, char** argv)
             ImGui::Text("PSW: "BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(proc.psw));
         ImGui::End();
 
-
-        
-
-
         ImGui::SetNextWindowPos(ImVec2(1080,20), ImGuiCond_Once);
         ImGui::Begin("Debug");
         ImVec2 mousePos = ImGui::GetMousePos();
             ImGui::Text("%f, %f",mousePos.x,mousePos.y);
         ImGui::End();
+
+        /* this is broken, please fix me */
+        if(getLoadBinaryMenu){
+            ImGui::SetNextWindowSize(ImVec2(700,125), ImGuiCond_Once);
+            ImGui::SetNextWindowPos(ImVec2(280,20), ImGuiCond_Once);
+            ImGui::Begin("Load Binary");
+                ImGui::Text("Input the filepath to the binary relative to the exectuable (sorry this will change soon)");
+                static char filepath[128] = "";
+                ImGui::InputText("Input Filepath",filepath,IM_ARRAYSIZE(filepath));
+                ImGui::Text("%s",filepath);
+                if(ImGui::Button("Load")){
+                    printf("%s\n",filename);
+                    bool good = proc.load(filename);
+                    if(good){
+                        getLoadBinaryMenu = false;
+                    }else{
+                        invalidFile = true;
+                    }
+                }
+                if(invalidFile){
+                    ImGui::TextColored(ImVec4(1.0f,0.0f,0.0f,1.0f), "Invalid File");
+                }
+            ImGui::End();
+
+
+             
+        }
 
 
 
@@ -157,7 +201,6 @@ int main(int argc, char** argv)
         SDL_GL_SwapWindow(window);
    
 
-    
 
     }
 

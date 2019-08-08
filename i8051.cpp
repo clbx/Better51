@@ -31,9 +31,8 @@ void i8051::reset(){
 }
 
 uint8_t i8051::nextByte(){
-    uint8_t next = rom[pc];
-    pc += 1;
-    return next;
+    pc++;
+    return rom[pc];
 }
 
 int i8051::getRegAddr(int reg){
@@ -95,9 +94,6 @@ void i8051::execute(uint8_t op){
 
 
     switch(op){
-        // NOP - No Opcode
-        case 0x00: pc++; break;
-25
         // ACALL - Absolute Call
         case 0x11:{ // ACALL page0
 
@@ -126,42 +122,40 @@ void i8051::execute(uint8_t op){
 
         // ADD - Add Accumulator
         case 0x24:{ //ADD A, #DATA
-
-            
+            ADD(nextByte());
         } break;
         case 0x25:{ //ADD A, iram addr
-            a = a + 5;
-            printf("A: %X\n",a);
+            ADD(memory[nextByte()]);
         } break;
         case 0x26:{ //ADD A, @R0
-            a = a + memory[memory[getRegAddr(0)]];
+            ADD(memory[memory[getRegAddr(0)]]);
         } break;
         case 0x27:{ //ADD A, @R1
-            a = a + memory[memory[getRegAddr(1)]];
+            ADD(memory[memory[getRegAddr(1)]]);
         } break;
         case 0x28:{ //ADD A, R0
-            a = a + memory[getRegAddr(0)];
+            ADD(memory[getRegAddr(0)]);
         } break;
         case 0x29:{ //ADD A, R1
-            a = a + memory[getRegAddr(1)];
+            ADD(memory[getRegAddr(1)]);
         } break;
         case 0x2A:{ //ADD A, R2
-            a = a + memory[getRegAddr(2)];
+            ADD(memory[getRegAddr(2)]);
         } break;
         case 0x2B:{ //ADD A, R3
-            a = a + memory[getRegAddr(3)];
+            ADD(memory[getRegAddr(3)]);
         } break;
         case 0x2C:{ //ADD A, R4
-            a = a + memory[getRegAddr(4)];
+            ADD(memory[getRegAddr(4)]);
         } break;
         case 0x2D:{ //ADD A, R5
-            a = a + memory[getRegAddr(5)];
+            ADD(memory[getRegAddr(5)]);
         } break;
         case 0x2E:{ //ADD A, R6
-            a = a + memory[getRegAddr(6)];
+            ADD(memory[getRegAddr(6)]);
         } break;
         case 0x2F:{ //ADD A, R7
-            a = a + memory[getRegAddr(7)];
+            ADD(memory[getRegAddr(7)]);
         } break;
 
         // ADDC - Add accumulator with carry
@@ -920,11 +914,6 @@ void i8051::execute(uint8_t op){
         case 0x6F:{// XRL A, R7 
         
         }break;
-
-
-        
-
-
-
     }
+    pc++;
 }
