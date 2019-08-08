@@ -44,10 +44,11 @@ class i8051{
         
         void setParity(); 
         void setCarries();
-        void overflow(int);
+        void overflow(int,int,int);
 
 
         void ADD(int);
+        void ADDC(int);
 
 
 };

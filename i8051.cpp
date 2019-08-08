@@ -59,12 +59,21 @@ void i8051::setParity(){
 /** ADD Opcode 
  *  Adds and then, does carry logic
  */
-void i8051::overflow(int val){
+
+
+//This function is from jarikomppa's emu8051 project. I had a lot of trouble figuring out a better way to 
+//get the overflow flags. 
+void i8051::overflow(int value1, int value2, int acc){
     psw = psw & 0x59;   //0011 1011  to clear carry bits
 
-    int carry = ((val & 255) + (a & 255)) >> 8;
-    int auxcarry = ((val & 7) + (a & 7)) >> 3;
-    int overflow = (((val & 127) + (a & 127)) >> 7)^carry;
+    /* Carry: overflow from 7th bit to 8th bit */
+    int carry = ((value1 & 255) + (value2 & 255) + acc) >> 8;
+    
+    /* Auxiliary carry: overflow from 3th bit to 4th bit */
+    int auxcarry = ((value1 & 7) + (value2 & 7) + acc) >> 3;
+    
+    /* Overflow: overflow from 6th or 7th bit, but not both */
+    int overflow = (((value1 & 127) + (value2 & 127) + acc) >> 7)^carry;
 
     if(carry){psw = psw | 0x80;}
     if(auxcarry){psw = psw | 0x40;}
@@ -74,9 +83,13 @@ void i8051::overflow(int val){
 
 
 void i8051::ADD(int val){
-    overflow(val);
+    overflow(a,val,0);
     a = a + val;
-    if(a > 256){a = 256;}
+}
+
+void i8051::ADDC(int val){
+    overflow(a,val,psw&0x80);
+    a = a + val;
 }
 
 
@@ -84,6 +97,7 @@ void i8051::tick(){
     printf("tick\n");
     execute(rom[pc]);
 }
+
 
 
 void i8051::execute(uint8_t op){
@@ -160,40 +174,40 @@ void i8051::execute(uint8_t op){
 
         // ADDC - Add accumulator with carry
         case 0x34:{ //ADDC A, #DATA
-
+            ADDC(nextByte());
         } break;
         case 0x35:{ //ADDC A, iram addr
-
+            ADDC(memory[nextByte()]);
         } break;
         case 0x36:{ //ADDC A, @R0
-
+            ADDC(memory[memory[getRegAddr(0)]]);
         } break;
         case 0x37:{ //ADDC A, @R1
-
+            ADDC(memory[memory[getRegAddr(1)]]);
         } break;
         case 0x38:{ //ADDC A, R0
-
+            ADDC(memory[getRegAddr(0)]);
         } break;
         case 0x39:{ //ADDC A, R1
-
+            ADDC(memory[getRegAddr(1)]);
         } break;
         case 0x3A:{ //ADDC A, R2
-
+            ADDC(memory[getRegAddr(2)]);
         } break;
         case 0x3B:{ //ADDC A, R3
-
+            ADDC(memory[getRegAddr(3)]);
         } break;
         case 0x3C:{ //ADDC A, R4
-
+            ADDC(memory[getRegAddr(4)]);
         } break;
         case 0x3D:{ //ADDC A, R5
-
+            ADDC(memory[getRegAddr(5)]);
         } break;
         case 0x3E:{ //ADDC A, R6
-
+            ADDC(memory[getRegAddr(6)]);
         } break;
         case 0x3F:{ //ADDC A, R7
-
+            ADDC(memory[getRegAddr(7)]);
         } break;
 
         // AJMP - Absolute Jump
