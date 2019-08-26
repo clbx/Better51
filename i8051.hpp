@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <iostream>
+#include <cstring>
 
 #define BYTE_TO_BINARY_PATTERN "%c %c %c %c  %c %c %c %c"
 #define BYTE_TO_BINARY(byte)  \
