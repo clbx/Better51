@@ -1,6 +1,10 @@
 # Better51
 An 8051 Simulator + Assembler
 
+I'm not working on this anymore due to working on Cosmic. The backbone is here, it just needs filling in.
+
+I'd do a lot of things different if I started over again though.
+
 # Things that need doing
 Now
 
